@@ -6,12 +6,15 @@ SUPPORTED_METHODS = []
 
 
 # AES encryptions
-AES_MODE_LIST = ['ECB', 'CBC'] # +['CFB', 'PGP', 'OFB', 'CTR']
+AES_MODE_LIST = ['ECB', 'CBC'] # + ['CFB', 'PGP', 'OFB', 'CTR']
 #TODO: tests fails on commented modes
 
 
-def _aes_encrypt(data: bytes, key, mode, iv) -> bytes:
-    enc = AES.new(key, AES_MODE_LIST.index(mode.upper())+1, iv)
+def _aes_encrypt(data: bytes, key: str, mode, iv) -> bytes:
+    if mode.upper() not in ['CBC', 'CFB', 'OFB']:
+        enc = AES.new(key.encode(), AES_MODE_LIST.index(mode.upper())+1)
+    else:
+        enc = AES.new(key.encode(), AES_MODE_LIST.index(mode.upper())+1, iv)
     data = pad(data, 16)
     return enc.encrypt(data)
 
@@ -25,7 +28,7 @@ SUPPORTED_METHODS.extend(['aes-256-'+i.lower() for i in AES_MODE_LIST])
 def openssl_encrypt(
     data: bytes, method: str, key: str,
     options: str = '',
-    iv: bytes = b"\0"*16,
+    iv: bytes = b'',
     tag="",
     aad="",
     tag_length=16
