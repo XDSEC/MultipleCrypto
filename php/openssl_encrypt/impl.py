@@ -12,7 +12,7 @@ AES_MODE_LIST = ['ECB', 'CBC'] # +['CFB', 'PGP', 'OFB', 'CTR']
 
 def _aes_encrypt(data: bytes, key, mode, iv) -> bytes:
     enc = AES.new(key, AES_MODE_LIST.index(mode.upper())+1, iv)
-    data = pad(data, len(key))
+    data = pad(data, 16)
     return enc.encrypt(data)
 
 
