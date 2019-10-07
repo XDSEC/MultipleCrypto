@@ -1,28 +1,11 @@
+from php.openssl_encrypt._aes import _aes_encrypt, AES_MODE_LIST
 import base64
 # pycryptodome / pycrypto
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
 SUPPORTED_METHODS = []
-
-
-# AES encryptions
-AES_MODE_LIST = ['ECB', 'CBC'] # + ['CFB', 'PGP', 'OFB', 'CTR']
-#TODO: tests fails on commented modes
-
-
-def _aes_encrypt(data: bytes, key: str, mode, iv) -> bytes:
-    if mode.upper() not in ['CBC', 'CFB', 'OFB']:
-        enc = AES.new(key.encode(), AES_MODE_LIST.index(mode.upper())+1)
-    else:
-        enc = AES.new(key.encode(), AES_MODE_LIST.index(mode.upper())+1, iv)
-    data = pad(data, 16)
-    return enc.encrypt(data)
-
 
 SUPPORTED_METHODS.extend(['aes-128-'+i.lower() for i in AES_MODE_LIST])
 SUPPORTED_METHODS.extend(['aes-192-'+i.lower() for i in AES_MODE_LIST])
 SUPPORTED_METHODS.extend(['aes-256-'+i.lower() for i in AES_MODE_LIST])
-
 
 #! export
 def openssl_encrypt(
@@ -64,8 +47,11 @@ def openssl_encrypt(
             data = data.encode('utf-8')
         else:
             raise TypeError('data must be bytes')
+    method = method.lower()
     if method not in SUPPORTED_METHODS:
         raise NotImplementedError('Encrytpion Method Not Implemented')
-    if method.lower().startswith('aes'):
-        return base64.b64encode(_aes_encrypt(data, key, method[-3:], iv)).decode()
-    pass
+    method = method.split('-')
+    if method[0] == 'aes':
+        raw_encrypted = _aes_encrypt(data, key, method[2], method[1], iv)
+    # elif method[0] == '':
+    return base64.b64encode(raw_encrypted).decode()
