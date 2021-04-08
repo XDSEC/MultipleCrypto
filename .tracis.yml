@@ -1,0 +1,9 @@
+dist: bionic
+addons:
+  apt:
+    packages:
+    - php
+language: python
+install:
+  - pip install pycryptodome
+script: python -m pytest
